@@ -1,16 +1,35 @@
-# Mitigating Reward Hacking in RLHF via Bayesian Non-negative Reward Modeling
+<h1 align="center">Mitigating Reward Hacking in RLHF via Bayesian Non-negative Reward Modeling</h1>
 
 <p align="center">
-  <b>Bayesian Non-Negative Reward Model (BNRM)</b><br>
-  Robust, uncertainty-aware reward modeling for RLHF.
+  <strong>Bayesian Non-Negative Reward Model (BNRM)</strong><br>
+  Robust, uncertainty-aware reward modeling with disentangled non-negative latent factors.
 </p>
 
 <p align="center">
   <a href="https://huggingface.co/collections/GuoweiRong/bayesian-non-negative-reward-modeling">
-    <img src="https://img.shields.io/badge/HuggingFace-Bayesian%20Non--Negative%20Reward%20Modeling-ffcc4d?style=for-the-badge&logo=huggingface&logoColor=black" alt="Hugging Face">
+    <img src="https://img.shields.io/badge/HuggingFace-BNRM%20Models-ffcc4d?style=for-the-badge&logo=huggingface&logoColor=black" alt="Hugging Face">
   </a>
+  <a href="https://arxiv.org/abs/2602.10623">
+    <img src="https://img.shields.io/badge/arXiv-2602.10623-b31b1b?style=for-the-badge&logo=arxiv&logoColor=white" alt="arXiv">
+  </a>
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
+  </a>
+  <img src="https://img.shields.io/badge/ICML%202026-Oral-4c6fff?style=for-the-badge" alt="ICML 2026 Oral">
 </p>
 
+<p align="center">
+  <a href="#overview">Overview</a> •
+  <a href="#released-models">Models</a> •
+  <a href="#rewardbench-results">Results</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#training">Training</a> •
+  <a href="#evaluation">Evaluation</a> •
+  <a href="#rlhf-ppo">RLHF/PPO</a> •
+  <a href="#citation">Citation</a>
+</p>
+
+<a id="overview"></a>
 ## ✨ Overview
 
 Reward models learned from human preferences are central to aligning large language models (LLMs) via reinforcement learning from human feedback, yet they are often vulnerable to reward hacking due to noisy annotations and systematic biases such as response length or style.
@@ -23,13 +42,26 @@ To scale BNRM to modern LLMs, we develop an amortized variational inference netw
 
 🏆 **BNRM has been accepted as an ICML 2026 Oral paper.**
 
+## 🌟 Highlights
+
+| What BNRM Improves | How |
+| --- | --- |
+| **Reward hacking mitigation** | Sparse non-negative latent factors suppress spurious preference correlations. |
+| **Uncertainty-aware learning** | Amortized variational inference models instance-level reward uncertainty end to end. |
+| **Robust generalization** | Stronger performance under distribution shift, limited annotations, and noisy labels. |
+| **Interpretability** | Non-negative reward decompositions expose more meaningful latent reward factors. |
+
+<a id="released-models"></a>
 ## 🤗 Released Models
 
-Our reward models will be released on Hugging Face:
+Our reward models are released through the Hugging Face collection below.
 
-- **Collection:** https://huggingface.co/collections/GuoweiRong/bayesian-non-negative-reward-modeling
-- The collection will host our open-source reward models, checkpoints, and related resources for Bayesian non-negative reward modeling.
+| Resource | Link |
+| --- | --- |
+| 🤗 Model collection | [GuoweiRong/bayesian-non-negative-reward-modeling](https://huggingface.co/collections/GuoweiRong/bayesian-non-negative-reward-modeling) |
+| Contents | Open-source reward models, checkpoints, and related resources for Bayesian non-negative reward modeling. |
 
+<a id="rewardbench-results"></a>
 ## 📈 RewardBench Results
 
 Results are reported on [RewardBench](https://github.com/allenai/reward-bench). Best scores within each block are **bold** and second-best scores are <u>underlined</u>. Deltas show the improvement over the corresponding base reward model.
@@ -74,6 +106,7 @@ A robust reward model should remain reliable when preference annotations are sca
 | --- | --- |
 | <img src="./fewshot.png" alt="Few-shot Results" width="420"> | <img src="./noise.png" alt="Noise Robustness" width="420"> |
 
+<a id="installation"></a>
 ## 🛠️ Installation
 
 Create the environment:
@@ -91,131 +124,68 @@ pip install -r requirements.txt
 
 `bench.txt` and `swift.txt` record the environments we used for reward-model evaluation and PPO training. They are provided as reference dependency snapshots.
 
+<a id="training"></a>
 ## 🚀 Training Reward Models
 
 All scripts are under `scripts/`. Adjust dataset paths, model paths, GPU ids, and output directories before running.
 
-Train a BT reward model:
+| Target | Command |
+| --- | --- |
+| BT reward model, LoRA | `bash scripts/train_bt_rm_lora.sh` |
+| BT reward model, full fine-tuning | `bash scripts/train_bt_rm_full.sh` |
+| GRM reward model, LoRA | `bash scripts/train_grm_lora.sh` |
+| GRM reward model, full fine-tuning | `bash scripts/train_grm_full.sh` |
+| BT-BNRM / GRM-BNRM, LoRA | `bash scripts/train_method_lora.sh` |
+| BT-BNRM, full fine-tuning | `bash scripts/train_method_full.sh` |
 
-```bash
-bash scripts/train_bt_rm_lora.sh
-```
-
-Train a full fine-tuned BT reward model:
-
-```bash
-bash scripts/train_bt_rm_full.sh
-```
-
-Train a GRM reward model:
-
-```bash
-bash scripts/train_grm_lora.sh
-```
-
-Train a full fine-tuned GRM reward model:
-
-```bash
-bash scripts/train_grm_full.sh
-```
-
-Train BT-BNRM and GRM-BNRM:
-
-```bash
-bash scripts/train_method_lora.sh
-```
-
-Train full BT-BNRM:
-
-```bash
-bash scripts/train_method_full.sh
-```
-
+<a id="evaluation"></a>
 ## 📊 Evaluating Reward Models
 
-For benchmark evaluation, this repository expects external benchmark code from:
-
-- **RewardBench:** https://github.com/allenai/reward-bench
-- **RM-Bench:** https://github.com/THU-KEG/RM-Bench
+For benchmark evaluation, this repository expects external benchmark code from [RewardBench](https://github.com/allenai/reward-bench) and [RM-Bench](https://github.com/THU-KEG/RM-Bench).
 
 We thank the authors of RewardBench and RM-Bench for their valuable evaluation frameworks.
 
-Evaluate BT and GRM reward models:
+| Evaluation | Command |
+| --- | --- |
+| BT reward model | `bash scripts/eval_bt_rm.sh` |
+| GRM reward model | `bash scripts/eval_grm_rm.sh` |
+| BNRM, LoRA | `bash scripts/eval_method_rm_lora.sh` |
+| BNRM, full fine-tuning | `bash scripts/eval_method_rm_full.sh` |
+| RewardBench BT | `bash scripts/rewardbench/BT_RewardBench.sh` |
+| RewardBench GRM | `bash scripts/rewardbench/GRM_RewardBench.sh` |
+| RewardBench BT-BNRM | `bash scripts/rewardbench/BNBT_RewardBench.sh` |
+| RewardBench full BT-BNRM | `bash scripts/rewardbench/BNBT_RewardBenchfull.sh` |
+| RM-Bench BT | `bash scripts/RMbench/BT.sh` |
+| RM-Bench GRM | `bash scripts/RMbench/GRM_RMbench.sh` |
+| RM-Bench BNRM | `bash scripts/RMbench/BNRM.sh` |
 
-```bash
-bash scripts/eval_bt_rm.sh
-bash scripts/eval_grm_rm.sh
-```
-
-Evaluate BNRM reward models:
-
-```bash
-bash scripts/eval_method_rm_lora.sh
-bash scripts/eval_method_rm_full.sh
-```
-
-Run RewardBench-style evaluation:
-
-```bash
-bash scripts/rewardbench/BT_RewardBench.sh
-bash scripts/rewardbench/GRM_RewardBench.sh
-bash scripts/rewardbench/BNBT_RewardBench.sh
-bash scripts/rewardbench/BNBT_RewardBenchfull.sh
-```
-
-Run RM-Bench-style evaluation:
-
-```bash
-bash scripts/RMbench/BT.sh
-bash scripts/RMbench/GRM_RMbench.sh
-bash scripts/RMbench/BNRM.sh
-```
-
+<a id="rlhf-ppo"></a>
 ## 🧪 RLHF / PPO
 
 We include PPO scripts for using BNRM as a reward model in RLHF.
 
 Our PPO training scripts are built around **[ms-swift](https://github.com/modelscope/ms-swift)** and our PPO result evaluation uses **[EvalScope](https://github.com/modelscope/evalscope)**:
 
-Run PPO training:
-
-```bash
-bash scripts/rlhf/BNRM_swift_ppo/ms_ppo_script.sh
-```
-
-Run PPO evaluation:
-
-```bash
-bash scripts/rlhf/BNRM_swift_ppo/evalscope_evaluation_script.sh
-```
+| Stage | Command |
+| --- | --- |
+| PPO training | `bash scripts/rlhf/BNRM_swift_ppo/ms_ppo_script.sh` |
+| PPO evaluation | `bash scripts/rlhf/BNRM_swift_ppo/evalscope_evaluation_script.sh` |
 
 ## 🎯 Best-of-N
 
 We also provide Best-of-N (BoN) scripts for analyzing how proxy reward models select responses from multiple sampled candidates. See `rlhf/bon/README.md` for the full workflow.
 
-Train proxy reward models:
+> **Tip:** If the reward models have already been trained, Step 1 can be skipped.
 
-> **Tip:** If the reward models have already been trained, this step can be skipped.
-
-```bash
-bash scripts/rlhf/bon/step1_train_proxy_reward_model_baseline.sh
-bash scripts/rlhf/bon/step1_train_proxy_reward_model_grm.sh
-```
-
-Generate candidate responses and score them:
-
-```bash
-bash scripts/rlhf/bon/step2_generate_samples_vllm.sh
-bash scripts/rlhf/bon/step3_obtain_proxy_score.sh
-```
-
-Select Best-of-N responses and evaluate them with the gold reward model:
-
-```bash
-bash scripts/rlhf/bon/step4_choose_best_of_n.sh
-bash scripts/rlhf/bon/step5_obtain_bon_gold_score.sh
-bash scripts/rlhf/bon/step6_collect.sh
-```
+| Step | Purpose | Command |
+| --- | --- | --- |
+| 1 | Train BT proxy reward model | `bash scripts/rlhf/bon/step1_train_proxy_reward_model_baseline.sh` |
+| 1 | Train GRM proxy reward model | `bash scripts/rlhf/bon/step1_train_proxy_reward_model_grm.sh` |
+| 2 | Generate candidate responses | `bash scripts/rlhf/bon/step2_generate_samples_vllm.sh` |
+| 3 | Score candidates with proxy reward models | `bash scripts/rlhf/bon/step3_obtain_proxy_score.sh` |
+| 4 | Select Best-of-N responses | `bash scripts/rlhf/bon/step4_choose_best_of_n.sh` |
+| 5 | Evaluate selected responses with the gold reward model | `bash scripts/rlhf/bon/step5_obtain_bon_gold_score.sh` |
+| 6 | Collect BoN results | `bash scripts/rlhf/bon/step6_collect.sh` |
 
 ## 📁 Repository Structure
 
@@ -235,6 +205,7 @@ This codebase is built on top of the excellent **[Generalizable Reward Model](ht
 
 This project also builds on the open-source LLM alignment ecosystem, including Hugging Face Transformers, PEFT, Accelerate, TRL/Swift, ms-swift, EvalScope, RewardBench, and RM-Bench. We sincerely thank the maintainers and authors of these projects.
 
+<a id="citation"></a>
 ## 📚 Citation
 
 If you find this work useful, please cite:
